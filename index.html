@@ -4,14 +4,19 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         $(function(){
+            var name = prompt("Please enter your name", "Anonymous");
+
             var iosocket = io.connect();
- 
+    
             iosocket.on('connect', function () {
                 $('#incomingChatMessages').append($('<li>Connected</li>'));
- 
+
                 iosocket.on('message', function(message) {
                     $('#incomingChatMessages').append($('<li></li>').text(message));
                 });
+
+                iosocket.emit('userConnected', name);
+
                 iosocket.on('disconnect', function() {
                     $('#incomingChatMessages').append('<li>Disconnected</li>');
                 });
@@ -20,8 +25,8 @@
             $('#outgoingChatMessage').keypress(function(event) {
                 if(event.which == 13) {
                     event.preventDefault();
-                    iosocket.send($('#outgoingChatMessage').val());
-                    $('#incomingChatMessages').append($('<li></li>').text($('#outgoingChatMessage').val()));
+                    iosocket.emit('chat', {user: name, text: $('#outgoingChatMessage').val()});
+                    $('#incomingChatMessages').append($('<li></li>').text('You: ' + $('#outgoingChatMessage').val()));
                     $('#outgoingChatMessage').val('');
                 }
             });

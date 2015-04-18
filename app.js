@@ -8,10 +8,21 @@ var server = http.createServer(function(req, res) {
 }).listen(8080, function() {
     console.log('Listening at: http://localhost:8080');
 });
- 
+
+var clients = [];
+
 socketio.listen(server).on('connection', function (socket) {
-    socket.on('message', function (msg) {
-        console.log('Message Received: ', msg);
-        socket.broadcast.emit('message', msg);
+    // Custom events
+    socket.on('userConnected', function(userName) {
+      var str = 'User connected: ' + userName;
+      console.log(str);
+      socket.emit('message', str);
+    });
+
+    socket.on('chat', function(msg) {
+      console.log('Chat Received: ', msg.user, msg.text);
+      str = msg.user + ": " + msg.text;
+      // Everyone except for the socket that starts it
+      socket.broadcast.emit('message', str);
     });
 });
